@@ -10,21 +10,17 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Setup toolchain vcpkg aggiornata
-      uses: lukka/run-vcpkg@v11
+    - name: Setup KDE Builder & Dependencies
+      uses: kde/kde-builder-action@v1
       with:
-        vcpkgDirectory: 'C:/vcpkg'
-        doNotUpdateVcpkg: false
-
-    - name: Installa Dipendenze Core (Qt6 e KF6)
-      run: |
-        C:\vcpkg\vcpkg install qtbase:x64-windows extra-cmake-modules:x64-windows kcoreaddons:x64-windows kxmlgui:x64-windows ktexteditor:x64-windows
+        # Prepara l'ambiente con le librerie core di Kate ed extra-cmake-modules
+        packages: 'ktexteditor kxmlgui kcoreaddons'
 
     - name: Configura CMake
       run: |
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" ..
+        cmake -DCMAKE_BUILD_TYPE=Release ..
 
     - name: Compila Plugin C++
       run: |
