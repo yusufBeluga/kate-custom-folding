@@ -13,11 +13,12 @@ jobs:
     - name: Setup vcpkg
       run: |
         git clone https://github.com C:\vcpkg
-        C:\vcpkg\bootstrap-vcpkg.bat
+        cd C:\vcpkg
+        .\bootstrap-vcpkg.bat
 
     - name: Install Dependencies via vcpkg
       run: |
-        C:\vcpkg\vcpkg install qtbase:x64-windows ktexteditor:x64-windows kxmlgui:x64-windows kcoreaddons:x64-windows extra-cmake-modules:x64-windows
+        C:\vcpkg\vcpkg install qtbase:x64-windows kf6texteditor:x64-windows kf6xmlgui:x64-windows kf6coreaddons:x64-windows extra-cmake-modules:x64-windows
 
     - name: Configure CMake
       run: |
