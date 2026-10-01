@@ -10,7 +10,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Configura vcpkg di sistema
+    - name: Configura e Aggiorna vcpkg di sistema
       run: |
         cd C:\vcpkg
         git pull
@@ -18,7 +18,7 @@ jobs:
 
     - name: Installa Dipendenze Core (Qt6 e KF6)
       run: |
-        C:\vcpkg\vcpkg install qtbase:x64-windows kf6-ktexteditor:x64-windows kf6-kxmlgui:x64-windows kf6-kcoreaddons:x64-windows extra-cmake-modules:x64-windows
+        C:\vcpkg\vcpkg install qtbase:x64-windows extra-cmake-modules:x64-windows kcoreaddons:x64-windows kxmlgui:x64-windows ktexteditor:x64-windows
 
     - name: Configura CMake
       run: |
