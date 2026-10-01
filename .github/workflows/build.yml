@@ -1,0 +1,73 @@
+name: Build Kate Plugin (Windows x64)
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 180
+
+    env:
+      CRAFT_ROOT: C:\CraftRoot
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # KDE Craft è il sistema con cui KDE compila Kate per Windows.
+      # Scarica Qt6 + KDE Frameworks 6 già compilati (MSVC 2022) dalla cache binaria di KDE,
+      # quindi il plugin viene compilato contro le stesse librerie usate da Kate.
+      - name: Cache Craft
+        id: craft-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            C:\CraftRoot
+            !C:\CraftRoot\download
+            !C:\CraftRoot\build
+            !C:\CraftRoot\tmp
+          key: craft-msvc2022-ktexteditor-v1
+
+      - name: Bootstrap Craft
+        if: steps.craft-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest https://raw.githubusercontent.com/KDE/craft/master/setup/CraftBootstrap.py -OutFile CraftBootstrap.py
+          python CraftBootstrap.py --prefix $env:CRAFT_ROOT --use-defaults
+
+      - name: Installa KTextEditor (KF6) dalla cache di Craft
+        shell: pwsh
+        run: |
+          python "$env:CRAFT_ROOT\craft\bin\craft.py" kde/frameworks/tier3/ktexteditor
+          python "$env:CRAFT_ROOT\craft\bin\craft.py" kde/frameworks/tier3/kxmlgui
+
+      - name: Versioni usate (devono corrispondere a quelle di Kate)
+        shell: pwsh
+        run: |
+          Select-String -Path "$env:CRAFT_ROOT\lib\cmake\Qt6Core\Qt6CoreConfigVersion.cmake" -Pattern 'set\(PACKAGE_VERSION ' | Select-Object -First 1
+          Select-String -Path "$env:CRAFT_ROOT\lib\cmake\KF6TextEditor\KF6TextEditorConfigVersion.cmake" -Pattern 'set\(PACKAGE_VERSION ' | Select-Object -First 1
+
+      - name: Compila il plugin
+        shell: pwsh
+        run: |
+          python "$env:CRAFT_ROOT\craft\bin\craft.py" --run cmake -S "$env:GITHUB_WORKSPACE" -B "$env:GITHUB_WORKSPACE\build" -G "Visual Studio 17 2022" -A x64 "-DCMAKE_PREFIX_PATH=$env:CRAFT_ROOT"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python "$env:CRAFT_ROOT\craft\bin\craft.py" --run cmake --build "$env:GITHUB_WORKSPACE\build" --config RelWithDebInfo
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Prepara la cartella da copiare
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "dist\kf6\ktexteditor" | Out-Null
+          Copy-Item "build\RelWithDebInfo\customfoldingplugin.dll" "dist\kf6\ktexteditor\"
+
+      - name: Carica la DLL
+        uses: actions/upload-artifact@v4
+        with:
+          name: customfoldingplugin-windows-x64
+          path: dist
