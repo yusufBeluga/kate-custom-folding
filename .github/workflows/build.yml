@@ -4,31 +4,34 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Setup KDE Craft Environment
-      uses: kde-looking-glass/setup-craft@v1
-      with:
-        target: 'kate'
+    - name: Configura vcpkg di sistema
+      run: |
+        cd C:\vcpkg
+        git pull
+        .\bootstrap-vcpkg.bat
 
-    - name: Configure CMake
-      shell: craft {0}
+    - name: Installa Dipendenze Core (Qt6 e KF6)
+      run: |
+        C:\vcpkg\vcpkg install qtbase:x64-windows kf6-ktexteditor:x64-windows kf6-kxmlgui:x64-windows kf6-kcoreaddons:x64-windows extra-cmake-modules:x64-windows
+
+    - name: Configura CMake
       run: |
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE=Release ..
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" ..
 
-    - name: Build Plugin
-      shell: craft {0}
+    - name: Compila Plugin C++
       run: |
         cd build
         cmake --build . --config Release
 
-    - name: Upload Binary Artifact
+    - name: Rilascia file DLL pronto
       uses: actions/upload-artifact@v4
       with:
         name: customfoldingplugin-windows-x64
