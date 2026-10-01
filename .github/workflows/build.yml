@@ -10,23 +10,28 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Installa Qt6 Ufficiale
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: '6.10.1'
-        arch: 'win64_msvc2022_64'
-        modules: 'qtbase'
-
-    - name: Configura MSVC Compiler
+    - name: Configura Compilatore MSVC Nativo
       uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Scarica e Configura KDE Craft Environment
+      run: |
+        git clone --depth=1 https://kde.org C:\craft
+        cd C:\craft
+        python craft-bootstrap.py --target-dir C:\CraftRoot --architecture x64
+
+    - name: Installa Librerie Core e ECM tramite Craft
+      run: |
+        import-module C:\CraftRoot\dev-utils\bin\craft.ps1
+        craft -i extra-cmake-modules ktexteditor kxmlgui kcoreaddons
 
     - name: Configura CMake
       run: |
+        import-module C:\CraftRoot\dev-utils\bin\craft.ps1
         mkdir build
         cd build
         cmake -DCMAKE_BUILD_TYPE=Release ..
 
-    - name: Compila Plugin C++
+    - name: Compila ed Estrai la DLL
       run: |
         cd build
         cmake --build . --config Release
