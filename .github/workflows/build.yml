@@ -10,21 +10,18 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Installazione Pulita di Vcpkg
-      run: |
-        git clone --depth=1 https://github.com ${{ github.workspace }}/vcpkg-fresh
-        cd ${{ github.workspace }}/vcpkg-fresh
-        .\bootstrap-vcpkg.bat
-
-    - name: Installa Dipendenze Core (Qt6 e KF6)
-      run: |
-        ${{ github.workspace }}/vcpkg-fresh/vcpkg install qtbase:x64-windows extra-cmake-modules:x64-windows kcoreaddons:x64-windows kxmlgui:x64-windows ktexteditor:x64-windows
+    - name: Inizializza Vcpkg Aggiornato
+      uses: johnwason/vcpkg-action@v1
+      with:
+        pkgs: qtbase extra-cmake-modules kcoreaddons kxmlgui ktexteditor
+        triplet: x64-windows
+        token: ${{ github.token }}
 
     - name: Configura CMake
       run: |
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg-fresh/scripts/buildsystems/vcpkg.cmake" ..
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake" ..
 
     - name: Compila Plugin C++
       run: |
