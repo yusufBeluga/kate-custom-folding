@@ -1,38 +1,39 @@
-name: Build Kate Plugin (Windows x64)
+name: Build Kate Plugin (Cross-Compile for Windows)
 
 on: [push, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: windows-2022
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Configura e Aggiorna vcpkg di sistema
+    - name: Installa Compilatore per Windows e Dipendenze
       run: |
-        cd C:\vcpkg
-        git pull
-        .\bootstrap-vcpkg.bat
+        sudo apt-get update
+        sudo apt-get install -y mingw-w64 cmake extra-cmake-modules \
+          qt6-base-dev libkf6texteditor-dev libkf6xmlgui-dev libkf6coreaddons-dev
 
-    - name: Installa Dipendenze Core (Qt6 e KF6)
-      run: |
-        C:\vcpkg\vcpkg install qtbase:x64-windows extra-cmake-modules:x64-windows kcoreaddons:x64-windows kxmlgui:x64-windows ktexteditor:x64-windows
-
-    - name: Configura CMake
+    - name: Configura CMake per Windows
       run: |
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" ..
+        # Usiamo il toolchain integrato in CMake per compilare un binario Windows a 64-bit
+        cmake -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_SYSTEM_NAME=Windows \
+              -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
+              -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
+              ..
 
     - name: Compila Plugin C++
       run: |
         cd build
-        cmake --build . --config Release
+        make
 
     - name: Rilascia file DLL pronto
       uses: actions/upload-artifact@v4
       with:
         name: customfoldingplugin-windows-x64
-        path: build/Release/customfoldingplugin.dll
+        path: build/customfoldingplugin.dll
