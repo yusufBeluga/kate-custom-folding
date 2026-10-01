@@ -38,7 +38,16 @@ jobs:
         shell: pwsh
         run: |
           Invoke-WebRequest https://raw.githubusercontent.com/KDE/craft/master/setup/CraftBootstrap.py -OutFile CraftBootstrap.py
+          # Craft ora usa MinSizeRel come default, ma la cache binaria di KDE per
+          # Windows/MSVC esiste solo per Release e RelWithDebInfo: senza questa riga
+          # Craft non trova i pacchetti (404) e prova a compilare tutto da sorgente.
+          $s = Get-Content CraftBootstrap.py -Raw
+          $s = $s.Replace('    boot.writeSettings()', "    boot.setSettingsValue('Compile', 'BuildType', 'RelWithDebInfo')`n    boot.writeSettings()")
+          if (-not $s.Contains("'BuildType', 'RelWithDebInfo'")) { throw "Impossibile impostare BuildType in CraftBootstrap.py" }
+          Set-Content CraftBootstrap.py $s -NoNewline
           python CraftBootstrap.py --prefix $env:CRAFT_ROOT --use-defaults
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Select-String -Path "$env:CRAFT_ROOT\etc\CraftSettings.ini" -Pattern '^BuildType'
 
       - name: Installa KTextEditor (KF6) dalla cache di Craft
         shell: pwsh
