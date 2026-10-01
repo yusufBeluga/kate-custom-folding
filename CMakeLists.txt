@@ -6,14 +6,31 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-# Librerie VERE di Kate (KDE Frameworks 6), non uno stub:
-# il plugin deve chiamare il codice di KTextEditor che Kate ha già caricato.
+# Qt deve avere la stessa versione di quello di Kate (6.10.1):
+# Kate rifiuta i plugin compilati con un Qt più recente.
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
-# ogni libreria KF6 ha il proprio pacchetto CMake (non esiste un KF6Config.cmake "ombrello")
-find_package(KF6TextEditor REQUIRED)
-find_package(KF6CoreAddons REQUIRED)
-find_package(KF6XmlGui REQUIRED)
-find_package(KF6Config REQUIRED)
+
+# KF6_ROOT = cartella dove sono stati estratti i pacchetti KDE Frameworks
+# (stessa versione di quella di Kate). Usiamo direttamente header e .lib
+# invece dei file CMake di KF6, che richiederebbero decine di altre dipendenze.
+set(KF6_ROOT "" CACHE PATH "Cartella con include/KF6 e lib/KF6*.lib")
+if(NOT KF6_ROOT OR NOT EXISTS "${KF6_ROOT}/include/KF6")
+    message(FATAL_ERROR "Imposta -DKF6_ROOT=<cartella con include/KF6 e lib>")
+endif()
+
+file(GLOB KF6_INCLUDE_CANDIDATES LIST_DIRECTORIES true "${KF6_ROOT}/include/KF6/*")
+set(KF6_INCLUDE_DIRS "${KF6_ROOT}/include/KF6")
+foreach(dir ${KF6_INCLUDE_CANDIDATES})
+    if(IS_DIRECTORY "${dir}")
+        list(APPEND KF6_INCLUDE_DIRS "${dir}")
+    endif()
+endforeach()
+
+set(KF6_LIBRARIES)
+foreach(lib KF6TextEditor KF6Parts KF6XmlGui KF6ConfigCore KF6CoreAddons KF6SyntaxHighlighting)
+    find_library(${lib}_LIB NAMES ${lib} PATHS "${KF6_ROOT}/lib" NO_DEFAULT_PATH REQUIRED)
+    list(APPEND KF6_LIBRARIES "${${lib}_LIB}")
+endforeach()
 
 add_library(customfoldingplugin MODULE
     customfoldingplugin.cpp
@@ -21,14 +38,13 @@ add_library(customfoldingplugin MODULE
     plugin.qrc
 )
 
+target_include_directories(customfoldingplugin PRIVATE ${KF6_INCLUDE_DIRS})
+
 target_link_libraries(customfoldingplugin PRIVATE
     Qt6::Core
     Qt6::Gui
     Qt6::Widgets
-    KF6::TextEditor
-    KF6::CoreAddons
-    KF6::XmlGui
-    KF6::ConfigCore
+    ${KF6_LIBRARIES}
 )
 
 # Kate cerca i plugin in <percorso plugin Qt>/kf6/ktexteditor
