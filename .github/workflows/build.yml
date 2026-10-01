@@ -4,29 +4,26 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: windows-2022
+    runs-on: windows-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Setup vcpkg
-      run: |
-        git clone https://github.com C:\vcpkg
-        cd C:\vcpkg
-        .\bootstrap-vcpkg.bat
-
-    - name: Install Dependencies via vcpkg
-      run: |
-        C:\vcpkg\vcpkg install qtbase:x64-windows kf6texteditor:x64-windows kf6xmlgui:x64-windows kf6coreaddons:x64-windows extra-cmake-modules:x64-windows
+    - name: Setup KDE Craft Environment
+      uses: kde-looking-glass/setup-craft@v1
+      with:
+        target: 'kate'
 
     - name: Configure CMake
+      shell: craft {0}
       run: |
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" ..
+        cmake -DCMAKE_BUILD_TYPE=Release ..
 
     - name: Build Plugin
+      shell: craft {0}
       run: |
         cd build
         cmake --build . --config Release
