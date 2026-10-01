@@ -58,7 +58,7 @@ jobs:
       - name: Versioni usate (devono corrispondere a quelle di Kate)
         shell: pwsh
         run: |
-          Select-String -Path "$env:CRAFT_ROOT\lib\cmake\Qt6Core\Qt6CoreConfigVersion.cmake" -Pattern 'set\(PACKAGE_VERSION ' | Select-Object -First 1
+          Select-String -Path "$env:CRAFT_ROOT\lib\cmake\Qt6Core\Qt6CoreConfigVersion*.cmake" -Pattern 'PACKAGE_VERSION "' | Select-Object -First 1
           Select-String -Path "$env:CRAFT_ROOT\lib\cmake\KF6TextEditor\KF6TextEditorConfigVersion.cmake" -Pattern 'set\(PACKAGE_VERSION ' | Select-Object -First 1
 
       - name: Compila il plugin
