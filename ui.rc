@@ -1,0 +1,11 @@
+<!DOCTYPE gui SYSTEM "kpartgui.dtd">
+<gui name="customfoldingplugin" library="customfoldingplugin" version="2">
+    <MenuBar>
+        <Menu name="tools">
+            <text>&amp;Tools</text>
+            <Separator/>
+            <Action name="custom_fold_create"/>
+            <Action name="custom_fold_clear"/>
+        </Menu>
+    </MenuBar>
+</gui>

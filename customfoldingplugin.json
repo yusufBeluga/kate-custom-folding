@@ -1,0 +1,10 @@
+{
+    "KPlugin": {
+        "Name": "Custom Folding Range",
+        "Description": "Crea folding range persistenti sulle righe selezionate (Ctrl+Shift+, crea, Ctrl+Shift+. elimina)",
+        "Icon": "code-context",
+        "Version": "1.0",
+        "License": "GPL",
+        "Authors": [ { "Name": "Giuseppe" } ]
+    }
+}
