@@ -1,32 +1,40 @@
-name: Build Kate Plugin (Windows x64)
+name: Build Kate Plugin (Cross-Compile for Windows)
 
 on: [push, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: windows-2022
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Configura Compilatore MSVC Nativo
-      uses: ilammy/msvc-dev-cmd@v1
+    - name: Installa Pacchetti di Sviluppo Qt6/KF6 e Toolchain Windows
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y mingw-w64 cmake extra-cmake-modules \
+          qt6-base-dev qt6-base-dev-tools libkf6texteditor-dev libkf6xmlgui-dev libkf6coreaddons-dev
 
-    - name: Configura CMake con Toolchain di Sistema
+    - name: Configura CMake per Target Windows x64
       run: |
         mkdir build
         cd build
-        # Usiamo la copia locale e stabile di vcpkg inclusa nativamente in Visual Studio 2022
-        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/vcpkg/scripts/buildsystems/vcpkg.cmake" ..
+        # Usiamo il compilatore MinGW-w64 per produrre un file eseguibile Windows (DLL)
+        cmake -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_SYSTEM_NAME=Windows \
+              -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
+              -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
+              -DCMAKE_PREFIX_PATH=/usr/lib/x86_64-linux-gnu/cmake \
+              ..
 
-    - name: Compila ed Estrai la DLL
+    - name: Esegui Compilazione
       run: |
         cd build
-        cmake --build . --config Release
+        make
 
     - name: Rilascia file DLL pronto
       uses: actions/upload-artifact@v4
       with:
         name: customfoldingplugin-windows-x64
-        path: build/Release/customfoldingplugin.dll
+        path: build/customfoldingplugin.dll
