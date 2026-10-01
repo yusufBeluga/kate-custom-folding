@@ -1,10 +1,10 @@
 #include "customfoldingplugin.h"
-#include <KTextEditor/View>
-#include <KTextEditor/Document>
-#include <KTextEditor/Range>
-#include <KXMLGuiFactory>
+
+#include "customfoldingplugin.h"
+// Rimuovi le vecchie inclusioni <KTextEditor/...> o <KXMLGuiFactory>
+
 #include <QAction>
-#include <KActionCollection>
+
 
 CustomFoldingPlugin::CustomFoldingPlugin(QObject *parent, const QVariantList &)
 : KTextEditor::Plugin(parent)
