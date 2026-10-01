@@ -10,18 +10,21 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Inizializza Vcpkg Aggiornato
-      uses: johnwason/vcpkg-action@v1
+    - name: Installa Qt6 Ufficiale
+      uses: jurplel/install-qt-action@v3
       with:
-        pkgs: qtbase extra-cmake-modules kcoreaddons kxmlgui ktexteditor
-        triplet: x64-windows
-        token: ${{ github.token }}
+        version: '6.10.1'
+        arch: 'win64_msvc2022_64'
+        modules: 'qtbase'
+
+    - name: Configura MSVC Compiler
+      uses: ilammy/msvc-dev-cmd@v1
 
     - name: Configura CMake
       run: |
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake" ..
+        cmake -DCMAKE_BUILD_TYPE=Release ..
 
     - name: Compila Plugin C++
       run: |
