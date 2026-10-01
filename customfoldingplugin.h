@@ -1,7 +1,7 @@
 #pragma once
+// Sostituisci le vecchie inclusioni <KTextEditor/...> con questa:
+#include "KTextEditor_Stub.h" 
 
-#include <KTextEditor/Plugin>
-#include <KTextEditor/MainWindow>
 #include <QObject>
 #include <QVariantList>
 
