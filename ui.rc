@@ -1,0 +1,13 @@
+<!DOCTYPE gui SYSTEM "kpartgui.dtd">
+<gui name="customfoldingplugin" version="1">
+    <MenuBar>
+        <Menu name="tools"><text>&amp;Tools</text>
+            <Action name="custom_fold_create"/>
+            <Action name="custom_fold_clear"/>
+        </Menu>
+    </MenuBar>
+    <ActionProperties>
+        <Action name="custom_fold_create" shortcut="Ctrl+Shift+," />
+        <Action name="custom_fold_clear" shortcut="Ctrl+Shift+." />
+    </ActionProperties>
+</gui>
