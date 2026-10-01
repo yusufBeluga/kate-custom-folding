@@ -20,13 +20,14 @@ jobs:
         python craft-bootstrap.py --target-dir C:\CraftRoot --architecture x64
 
     - name: Installa Librerie Core e ECM tramite Craft
+      shell: powershell
       run: |
-        import-module C:\CraftRoot\dev-utils\bin\craft.ps1
-        craft -i extra-cmake-modules ktexteditor kxmlgui kcoreaddons
+        & C:\CraftRoot\dev-utils\bin\craft.ps1 -i extra-cmake-modules ktexteditor kxmlgui kcoreaddons
 
     - name: Configura CMake
+      shell: powershell
       run: |
-        import-module C:\CraftRoot\dev-utils\bin\craft.ps1
+        & C:\CraftRoot\dev-utils\bin\craft.ps1
         mkdir build
         cd build
         cmake -DCMAKE_BUILD_TYPE=Release ..
