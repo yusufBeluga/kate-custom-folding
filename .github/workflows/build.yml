@@ -13,28 +13,16 @@ jobs:
     - name: Configura Compilatore MSVC Nativo
       uses: ilammy/msvc-dev-cmd@v1
 
-    - name: Scarica e Configura KDE Craft Environment
-      run: |
-        git clone --depth=1 https://kde.org C:\craft
-        cd C:\craft
-        python craft-bootstrap.py --target-dir C:\CraftRoot --architecture x64
+    - name: Configura CMake nativo di sistema
+      uses: jwlawson/actions-setup-cmake@v2
+      with:
+        cmake-version: '3.24.x'
 
-    - name: Installa Librerie Core e ECM tramite Craft
-      shell: powershell
+    - name: Esegui la compilazione pulita
       run: |
-        & C:\CraftRoot\dev-utils\bin\craft.ps1 -i extra-cmake-modules ktexteditor kxmlgui kcoreaddons
-
-    - name: Configura CMake
-      shell: powershell
-      run: |
-        & C:\CraftRoot\dev-utils\bin\craft.ps1
         mkdir build
         cd build
         cmake -DCMAKE_BUILD_TYPE=Release ..
-
-    - name: Compila ed Estrai la DLL
-      run: |
-        cd build
         cmake --build . --config Release
 
     - name: Rilascia file DLL pronto
