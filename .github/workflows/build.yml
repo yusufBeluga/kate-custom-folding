@@ -13,16 +13,16 @@ jobs:
     - name: Configura Compilatore MSVC Nativo
       uses: ilammy/msvc-dev-cmd@v1
 
-    - name: Configura CMake nativo di sistema
-      uses: jwlawson/actions-setup-cmake@v2
-      with:
-        cmake-version: '3.24.x'
-
-    - name: Esegui la compilazione pulita
+    - name: Configura CMake con Toolchain di Sistema
       run: |
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE=Release ..
+        # Usiamo la copia locale e stabile di vcpkg inclusa nativamente in Visual Studio 2022
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/vcpkg/scripts/buildsystems/vcpkg.cmake" ..
+
+    - name: Compila ed Estrai la DLL
+      run: |
+        cd build
         cmake --build . --config Release
 
     - name: Rilascia file DLL pronto
