@@ -10,17 +10,21 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Setup KDE Builder & Dependencies
-      uses: kde/kde-builder-action@v1
-      with:
-        # Prepara l'ambiente con le librerie core di Kate ed extra-cmake-modules
-        packages: 'ktexteditor kxmlgui kcoreaddons'
+    - name: Installazione Pulita di Vcpkg
+      run: |
+        git clone --depth=1 https://github.com D:\vcpkg-fresh
+        cd D:\vcpkg-fresh
+        .\bootstrap-vcpkg.bat
+
+    - name: Installa Dipendenze Core (Qt6 e KF6)
+      run: |
+        D:\vcpkg-fresh\vcpkg install qtbase:x64-windows extra-cmake-modules:x64-windows kcoreaddons:x64-windows kxmlgui:x64-windows ktexteditor:x64-windows
 
     - name: Configura CMake
       run: |
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE=Release ..
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="D:/vcpkg-fresh/scripts/buildsystems/vcpkg.cmake" ..
 
     - name: Compila Plugin C++
       run: |
