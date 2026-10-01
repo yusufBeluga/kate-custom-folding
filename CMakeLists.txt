@@ -9,7 +9,11 @@ set(CMAKE_AUTORCC ON)
 # Librerie VERE di Kate (KDE Frameworks 6), non uno stub:
 # il plugin deve chiamare il codice di KTextEditor che Kate ha già caricato.
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
-find_package(KF6 REQUIRED COMPONENTS TextEditor CoreAddons XmlGui Config)
+# ogni libreria KF6 ha il proprio pacchetto CMake (non esiste un KF6Config.cmake "ombrello")
+find_package(KF6TextEditor REQUIRED)
+find_package(KF6CoreAddons REQUIRED)
+find_package(KF6XmlGui REQUIRED)
+find_package(KF6Config REQUIRED)
 
 add_library(customfoldingplugin MODULE
     customfoldingplugin.cpp
